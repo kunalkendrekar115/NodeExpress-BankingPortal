@@ -1,10 +1,12 @@
 const fs = require("fs")
 const path = require("path")
 const express = require("express")
+const accountRoutes = require("./routes/accounts")
+const servicesRoutes = require("./routes/services")
 
 const data = require('./data')
 
-const { users, accounts, writeJSON } = data
+const { users, accounts } = data
 const app = express()
 
 app.set('views', path.join(__dirname, '/views'))
@@ -14,48 +16,9 @@ app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }))
 
-app.get('/transfer', function (req, res) {
-    res.render('transfer')
-})
+app.use('/account',accountRoutes)
+app.use('/services',servicesRoutes)
 
-
-app.post('/transfer', function (req, res) {
-
-    accounts[req.body.from].balance = parseInt(accounts[req.body.from].balance) - parseInt(req.body.amount)
-    accounts[req.body.to].balance = parseInt(accounts[req.body.to].balance) + parseInt(req.body.amount)
-    const accountsJSON = JSON.stringify(accounts)
-
-    writeJSON(accountsJSON)
-
-    res.render('transfer', { message: "Transfer Completed" })
-
-})
-
-app.get('/payment', function (req, res) {
-    res.render('payment', { account: accounts.credit })
-})
-
-app.post('/payment', function (req, res) {
-    accounts.credit.balance = parseInt(accounts.credit.balance) - parseInt(req.body.amount)
-    accounts.credit.available = parseInt(accounts.credit.available) + parseInt(req.body.amount)
-    const accountsJSON = JSON.stringify(accounts)
-
-    writeJSON(accountsJSON)
-
-    res.render('payment', { message: "Payment Successful", account: accounts.credit })
-})
-
-app.get('/savings', function (req, res) {
-    res.render('account', { account: accounts.savings })
-})
-
-app.get('/checking', function (req, res) {
-    res.render('account', { account: accounts.checking })
-})
-
-app.get('/credit', function (req, res) {
-    res.render('account', { account: accounts.credit })
-})
 
 app.get('/profile', function (req, res) {
     res.render('profile', { user: users[0] })
